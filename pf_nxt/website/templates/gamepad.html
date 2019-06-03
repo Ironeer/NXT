@@ -11,19 +11,6 @@
       margin		: 50;
       background-color: #BBB;
       }
-      #joystick-container {
-      height		: 350px;
-      /*
-      width		: 500px;
-      height: 100%;
-      min-height		: 1000px;
-      overflow	: hidden;
-      padding		: 0;
-      margin		: 0;
-      -webkit-user-select	: none;
-      -moz-user-select	: none;
-      */
-      }
       #cam-container {
       width		: 640px;
       height		: 480px;
@@ -48,11 +35,11 @@
       </iframe>
     </div>
     <div class="btn-group-sm" role="group" aria-label="Basic example">
-      <button type="button" onclick="init_joystick()" class="btn btn-primary mb-1">
-        Initialize joystick
+      <button type="button" onclick="init_gamepad()" class="btn btn-primary mb-1">
+        Initialize Gamepad
       </button>
-      <button type="button" onclick="destroy_joystick()" class="btn btn-primary mb-1">
-        Destroy joystick
+      <button type="button" onclick="destroy_gamepad()" class="btn btn-primary mb-1">
+        Destroy Gamepad
       </button>
       <button type="button" onclick="create_ws()" class="btn btn-primary mb-1">
         Connect websocket
