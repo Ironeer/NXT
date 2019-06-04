@@ -1,31 +1,50 @@
-
 ws = null;
 turng = 0;
 speedg = 0;
+gamepad=null;
 
 function init_gamepad() {
-    document.addEventListener('keydown', function(event) {
+window.addEventListener("gamepadconnected", function(e) {
+  gamepad = navigator.getGamepads()[e.gamepad.index];
+  console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+    e.gamepad.index, e.gamepad.id,
+    e.gamepad.buttons.length, e.gamepad.axes.length);
+});  
+
+/*document.addEventListener('keydown', function(event) {
         if(event.keyCode == 37) {
             turng = -1;
-            alert('Left was pressed');
         }
         else if(event.keyCode == 38) {
-            speedg = 1;
-            alert('Up was pressed');
+            speedg = -1;
         }
         else if(event.keyCode == 39) {
             turng = 1;
-            alert('Right was pressed');
         }
         else if(event.keyCode == 40) {
-            speedg = -1;
-            alert('Down was pressed');
+            speedg = 1;
         }
     });
+       document.addEventListener('keyup', function(event) {
+        if(event.keyCode == 37) {
+            turng = 0;
+        }
+        else if(event.keyCode == 38) {
+            speedg = 0;
+        }
+        else if(event.keyCode == 39) {
+            turng = 0;
+        }
+        else if(event.keyCode == 40) {
+            speedg = 0;
+        }
+    });
+*/
 }
 
 function destroy_gamepad() {
-    document.removeEventListener("keydown")
+   // document.removeEventListener("keydown")
+    //document.removeEventListener("keydown")
 }
 
 function create_ws() {
@@ -58,10 +77,16 @@ function create_ws() {
 }
 
 function ws_send_gamepad() {
+  var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+  if (!gamepads) {
+    return;
+  }
 
-  // normalize joystick values so they are always between -1 and 1
-  var turn = turng;
-  var forward = speedg;
+  var gp = gamepads[0];
+
+  var turn = gp.axes[2];
+  var forward = gp.axes[1];
+
 
   console.log(turn);
   console.log(forward);

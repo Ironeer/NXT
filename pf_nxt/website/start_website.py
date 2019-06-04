@@ -39,3 +39,16 @@ def joystick():
         ws_url=ws_url,
         sessionID=str(sid)
     )
+
+
+@app.route('/gamepad.html')
+def gamepad():
+    sid = getSID()
+    ip = getip()
+    ws_url = "ws://%s:9998" % ip
+    return render_template(
+        'gamepad.html',
+        ip=ip,
+        ws_url=ws_url,
+        sessionID=str(sid)
+    )
