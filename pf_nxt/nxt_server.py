@@ -37,4 +37,14 @@ class NxtServer(object):
             except Exception as e:
                 # print('bad data or something', data)
                 print(e)
+            try:
+                data_json = json.loads(data)
+                calibrate = data_json['calibrate']
+                if(calibrate){
+                    print('Got valid data, calibrating...', data_json)
+                    self.robo.calibrate()
+                }
+            except Exception as e:
+                # print('bad data or something', data)
+                print(e)
             time.sleep(.05)

@@ -9,7 +9,7 @@ window.addEventListener("gamepadconnected", function(e) {
   console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
     e.gamepad.index, e.gamepad.id,
     e.gamepad.buttons.length, e.gamepad.axes.length);
-});  
+});
 
 /*document.addEventListener('keydown', function(event) {
         if(event.keyCode == 37) {
@@ -86,6 +86,17 @@ function ws_send_gamepad() {
 
   var turn = gp.axes[2];
   var forward = gp.axes[1];
+
+  var pressed = gp.buttons[0];
+
+  console.log("Cal p: "+pressed)
+  if(pressed==1){
+    ws.send(JSON.stringify({
+      calibrate:true,
+      time: Date.now(),
+      sid: "{{sessionID}}"
+    }));
+  }
 
 
   console.log(turn);
