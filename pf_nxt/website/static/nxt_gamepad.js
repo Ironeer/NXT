@@ -1,58 +1,15 @@
+
+
 ws = null;
-turng = 0;
-speedg = 0;
-gamepad=null;
-
-function init_gamepad() {
-window.addEventListener("gamepadconnected", function(e) {
-  gamepad = navigator.getGamepads()[e.gamepad.index];
-  console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-    e.gamepad.index, e.gamepad.id,
-    e.gamepad.buttons.length, e.gamepad.axes.length);
-});
-
-/*document.addEventListener('keydown', function(event) {
-        if(event.keyCode == 37) {
-            turng = -1;
-        }
-        else if(event.keyCode == 38) {
-            speedg = -1;
-        }
-        else if(event.keyCode == 39) {
-            turng = 1;
-        }
-        else if(event.keyCode == 40) {
-            speedg = 1;
-        }
-    });
-       document.addEventListener('keyup', function(event) {
-        if(event.keyCode == 37) {
-            turng = 0;
-        }
-        else if(event.keyCode == 38) {
-            speedg = 0;
-        }
-        else if(event.keyCode == 39) {
-            turng = 0;
-        }
-        else if(event.keyCode == 40) {
-            speedg = 0;
-        }
-    });
-*/
-}
-
-function destroy_gamepad() {
-   // document.removeEventListener("keydown")
-    //document.removeEventListener("keydown")
-}
-
+shock = 0;
+shockRec = 0;
 function create_ws() {
 
 
   // Let us open a web socket
   var ws_url = $("#el_ws_url").val();
-
+    shock = 0;
+    shockRec = 0;
   ws = new WebSocket(ws_url);
   alert("WebSocket created");
 
@@ -76,7 +33,20 @@ function create_ws() {
   setInterval(ws_send_gamepad, 500);
 }
 
+
+
 function ws_send_gamepad() {
+    var ws_url = $("#el_ws_url").val();
+    const Http = new XMLHttpRequest();
+    const url = "http://"+ws_url.substring(5,ws_url.length-5)+":5000/detect";
+    Http.open("GET",url);
+    Http.send();
+    Http.onreadystatechange=(e)=>{
+	shockRec = Http.responseText;
+    }
+
+
+    
   var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
   if (!gamepads) {
     return;
@@ -84,19 +54,50 @@ function ws_send_gamepad() {
 
   var gp = gamepads[0];
 
+    if (gp.vibrationActuator && (shockRec!= shock )) {
+	gp.vibrationActuator.playEffect("dual-rumble", {
+
+	    duration: 1000,
+
+	    strongMagnitude: 1.0,
+
+	    weakMagnitude: 1.0
+
+	});
+	shock = shockRec;
+    }
+
+
+
+    
   var turn = gp.axes[2];
   var forward = gp.axes[1];
 
   var pressed = gp.buttons[0];
-
-  console.log("Cal p: "+pressed)
-  if(pressed==1){
-    ws.send(JSON.stringify({
-      calibrate:true,
-      time: Date.now(),
-      sid: "{{sessionID}}"
-    }));
+  if(typeof(pressed)=="object"){
+     pressed = pressed.pressed;
   }
+
+  var snap = gp.buttons[1];
+  if(typeof(snap)=="object"){
+     snap = snap.pressed;
+  }
+
+  if(snap){
+      console.log("snap");
+
+      var xhr = new XMLHttpRequest();
+      var link = "http://"+ws_url.substring(5,ws_url.length-5)+":8080/0/action/snapshot";
+      console.log(link);
+      xhr.open('GET', link, true);
+      xhr.send();
+  }
+	
+
+
+
+
+  console.log("Cal p: "+pressed);
 
 
   console.log(turn);
@@ -111,11 +112,32 @@ function ws_send_gamepad() {
     turn: turn,
     forward: forward,
     tower: "0",
+    pressed:pressed,
     time: Date.now(),
     sid: "{{sessionID}}"
   }));
 
 }
+
+
+function calibrate() {
+    console.log("calibrating");
+  if ( !ws ) {
+    console.log("no websocket! aborting");
+    return;
+  }
+
+  ws.send(JSON.stringify({
+    turn: 0,
+    forward: 0,
+    tower: "0",
+    pressed:true,
+    time: Date.now(),
+    sid: "{{sessionID}}"
+  }));
+
+}
+
 
 function disconnect_ws() {
   if ( !ws ) {
