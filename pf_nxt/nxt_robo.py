@@ -12,8 +12,9 @@ from pf_nxt.nxt_player import Nxt_Player
 from pf_nxt.nxt_pad import PadController
 from pf_nxt.nxt_autopilot import AutoPilot
 from pf_nxt.nxt_pair import Pair
+import socket
 
-
+    
 # TODO: make base class from this to implement mechanical specifics in
 # subclasses OR by composition (Motor Behaviours)
 # favor composition ;-)
@@ -63,6 +64,7 @@ class ScoutRobo(object):
             self.pad_controller = PadController(self)
         self.autopilot = AutoPilot(self)
 
+        self.right = True
         self.calibrate()
 
     def init_motors(self):
@@ -106,6 +108,7 @@ class ScoutRobo(object):
         self.steering_motor.run(power=direction * 60)
         time.sleep(1)
         # time.sleep(10)
+
 
         self.touch_left = self.sensors["touch_left"].get_sample()
         while not self.touch_left:
@@ -210,14 +213,51 @@ class ScoutRobo(object):
             self.go_forward(power=int(60 + 67 * forward))
 
         tacho_cur = self.steering_motor.get_tacho().tacho_count
-
+        
         # stop robot if nothing is found
         if abs(forward) < STEERING_MARGIN:
             self.stop()
         if abs(turn) < STEERING_MARGIN:
             # go to middle position
             print('To middle')
-            tacho_diff = self.tacho_middle - tacho_cur
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            s.connect(("192.168.43.235",8092))
+            data = 1
+            try:
+                while True:
+                    s.sendall(bytes("avoid",'utf-8'))
+            
+                    data = s.recv(1024).decode()
+                    if not data:
+                        break
+                    print("data ")
+                    print(data)
+                    if data==str(0):
+                        break                    
+                    if self.sensors["touch_right"].get_sample():
+                        self.right =False
+                        self.steering_motor.brake()
+                        self.steering_motor.run(power=-STEERING_POWER)
+                    elif self.sensors["touch_left"].get_sample():
+                        print("touch")
+                        self.steering_motor.brake()
+                        self.right = True
+                        self.steering_motor.run(power=STEERING_POWER)
+                    elif self.right:
+                        print("run1")
+                        self.steering_motor.run(power=STEERING_POWER)
+                    elif not self.right:
+                        print("run-1")
+                        self.steering_motor.run(power= -STEERING_POWER)
+                    
+                print("break")
+                self.steering_motor.brake()
+
+            except Exception as e:
+                print(e)
+                '''tacho_diff = self.tacho_middle - tacho_cur
             tacho_steer = not abs(tacho_diff) < 25
             if tacho_diff > 0 and tacho_steer:
                 self.steering_motor.turn(
@@ -229,6 +269,9 @@ class ScoutRobo(object):
                     power=-STEERING_POWER,
                     tacho_units=-tacho_diff
                 )
+            '''
+
+            
         else:  # ...or perform steering by
             # calculating difference to middle position based on turn value
             # avoid oversteering, only use fraction of steering_interval
@@ -240,11 +283,13 @@ class ScoutRobo(object):
                     power=STEERING_POWER,
                     tacho_units=-tacho_diff
                 )
+                self.right = False
             elif tacho_diff > 0 and not self.sensors["touch_right"].get_sample():
                 self.steering_motor.turn(
                     power=-STEERING_POWER,
                     tacho_units=tacho_diff
                 )
+                self.right= True
 
         if tower > 0:
             self.turn_tower(power=60)
