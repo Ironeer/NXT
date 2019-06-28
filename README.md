@@ -10,6 +10,9 @@ Featured ways to control robot:
 
 # Installation
 
+## PerFact current config:
+pi@192.168.43.235 pw aus secrets
+
 ## Beginners Guide
 
 + Download repo
@@ -36,6 +39,18 @@ nxt_start_server -w
 
 Then open in your Webbrowser localhost:5000 and press Create Websocket
 
+### Start PerFact Features
+
+Start the camera stream:
+
+```
+sudo motion start
+```
+
+Start the Socket that gives the webserver the sensor data(shock detect/calibration)
+```
+sudo python3 sensor_service.py
+```
 
 ### Gamepad Version
 
