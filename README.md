@@ -11,7 +11,7 @@ Featured ways to control robot:
 # Installation
 
 ## PerFact current config:
-pi@192.168.43.235 pw aus secrets
+pi@192.168.43.235 pw aus secrets (PerFact User)
 
 ## Beginners Guide
 
