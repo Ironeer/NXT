@@ -35,12 +35,14 @@ def listen(conn):
                     # if data is not received break
                     break
                 print("from connected user: " + str(data))
+
                 if(str(data) == 'avoid'):
                         print("avoid: "+str(GPIO.input(avoid)))
                         conn.send(bytes(str(GPIO.input(avoid)),'utf-8'))
                 else:
                         data =  json.dumps(shocksDetect)
                         conn.send(bytes(data,'utf-8'))  # send data to the client
+
         
         except Exception as e:
             conn.close()  # close the connection
@@ -56,6 +58,7 @@ GPIO.setmode(GPIO.BOARD)
 
 GPIO.setup(shock, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(avoid, GPIO.IN)
+
 
 shocksDetect = 0
 

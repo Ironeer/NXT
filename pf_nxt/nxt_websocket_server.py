@@ -11,10 +11,13 @@ actSID = "localhost"
 lastSeen = 0
 delay = 500
 
+
 async def runserver(websocket, path):
     global actSID
     global lastSeen
+
     calDone = 10
+
     assert robo, 'robo instance needed!'
     while True:
         data = await websocket.recv()
@@ -31,8 +34,10 @@ async def runserver(websocket, path):
             comptime = time.time() * 1000
             tower = 0
             calDone-=1
+
             
             print(comptime - (sitetime+abs(delay)))
+
             if actSID == "localhost" or lastSeen + 10 < time.time():
                 print("new User")
                 actSID = data_json['sid']
@@ -51,7 +56,7 @@ async def runserver(websocket, path):
                 robo.move(forward, turn, tower)
         except Exception as e:
             print("Exception: %s %s"%(e,traceback.format_exc()))
-            
+
 def initwebserver(robo_inst, ip, port):
 
     global robo
